@@ -3,18 +3,6 @@ Board = {}
 x_piece = love.graphics.newImage('resources/x_piece.png')
 o_piece = love.graphics.newImage('resources/o_piece.png')
 
---[[
-
-#############
-# 1 # 4 # 7 #
-#############
-# 2 # 5 # 8 #
-#############
-# 3 # 6 # 9 #
-#############
-
-]]--
-
 --Initialize the board (object orientation style)
 function Board:new()
     tablestate = {}
