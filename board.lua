@@ -1,5 +1,12 @@
 
-Board = {} 
+Board = {}
+for i=1,7 do
+    Board[i] = {}
+    for j=1,M do
+        Board[i][j] = 0
+    end
+end
+
 x_piece = love.graphics.newImage('resources/x_piece.png')
 o_piece = love.graphics.newImage('resources/o_piece.png')
 
