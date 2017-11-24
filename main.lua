@@ -24,20 +24,14 @@ function love.load()
 end
 
 --Method occurs when mouse is pressed
-function love.mousepressed(x, y, button, istouch)
-    if button == 1 and winner == '' then --Left click, game hasn't ended yet
-        --Check if the mousepress was viable for a new move
-        if(MyBoard:setToken(mousepress(),turn)) then
-            winner = MyBoard:checkWinner() --Check for a winner
-            --Next player's turn
-            if turn == 'x' then turn = 'o'
-            elseif turn == 'o' then turn = 'x'
-            end
-        end
-    end
+function menustate:mousepressed(x, y, button, istouch)
     if Menu:ProcessInput(x,y) then
         StateMachine.switch(gamestate)
     end
+end
+
+function gamestate:mousepressed(x,y,button,istouch)
+    MyBoard:getTile(x,y)
 end
 
 function menustate:enter()

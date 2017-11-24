@@ -1,13 +1,11 @@
 tile_armor = require 'Tiles/tile_armor'
 tile_sword = require 'Tiles/tile_sword'
 
-
-print(tile_armor:getType())
-print(tile_sword:getType())
-
+--Starting X,Y and width/height for each tile
 blockX = love.graphics.getWidth()/6
 blockY = love.graphics.getHeight()/10.66666
 
+--Initialize a board
 Board = {}
 for i=1,6 do
     Board[i] = {}
@@ -39,12 +37,11 @@ end
 
 --Method to draw the pieces on the board
 function Board:draw()
+    imageScaleX,imageScaleY = getScaling(tile_armor.image)    
     --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces
-    imageScaleX,imageScaleY = getScaling(tile_armor.image)
-    joffset = 1/3
     for i=1,6 do
         for j=1,6 do
-            love.graphics.draw(Board[i][j].image,blockX * (i-1),blockY * (j+joffset),0,imageScaleX/6,imageScaleY/10.6666)       
+            love.graphics.draw(Board[i][j].image,blockX * (i-1),blockY * (j+1/3),0,imageScaleX/6,imageScaleY/10.6666)       
         end
     end
 
@@ -55,6 +52,19 @@ function Board:clear()
     for k in pairs (self) do
         self[k] = nil
     end
+end
+
+function Board:isTouched(x,y)
+
+end
+
+function Board:getTile(x,y)
+    thisX = math.floor(x / (love.graphics.getWidth() / 6))
+    thisY = math.floor((y / (love.graphics.getHeight() / 10.66666) + 1.6666))
+
+    if thisY <= 2 or thisY >= 9 then return false end
+
+    Board[thisX+1][thisY-2]:getType()
 end
 
 function getScaling(drawable)

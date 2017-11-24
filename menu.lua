@@ -25,7 +25,6 @@ function Menu:ProcessInput(x,y)
     buttonEndX = love.graphics.getWidth()/4 + (imageScaleX/4) * playbutton:getWidth()
     buttonStartY = love.graphics.getHeight()/2
     buttonEndY = love.graphics.getHeight()/2 + imageScaleY/8 * playbutton:getHeight()
-    print (buttonStartY .. ' ' .. buttonEndY .. ' ' .. y)
     if x < buttonEndX and x > buttonStartX and y < buttonEndY and y > buttonStartY then
         return true
     end
