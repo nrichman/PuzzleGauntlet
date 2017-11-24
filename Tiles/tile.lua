@@ -1,5 +1,6 @@
 tile = {}
 tile.name = 'base'
+tile.faded = false
 
 function tile:new()
     newObj = {sound = 'woof'}

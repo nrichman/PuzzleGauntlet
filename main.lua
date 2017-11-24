@@ -34,6 +34,10 @@ function gamestate:mousepressed(x,y,button,istouch)
     MyBoard:getTile(x,y)
 end
 
+function gamestate:mousereleased(x,y,button,istouch)
+    MyBoard:handsOff()
+end
+
 function menustate:enter()
     
 end
@@ -48,8 +52,7 @@ end
 
 --Draw method occurs every frame
 function gamestate:draw()
-    love.graphics.setColor(255,255,255,255); --Sets color to white 
-
+    love.graphics.setColor(255,255,255,255); --Sets color to white
     imageScaleX,imageScaleY = getScaling(board)
     love.graphics.draw(board,0,0,0,imageScaleX,imageScaleY) --Draws the board
     MyBoard:draw() --Draws the pieces on the board

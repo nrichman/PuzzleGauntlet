@@ -10,7 +10,9 @@ Board = {}
 for i=1,6 do
     Board[i] = {}
     for j=1,6 do
-        Board[i][j] = tile_sword
+        if i % 2 == 0 then Board[i][j] = tile_sword:new()
+        else Board[i][j] = tile_armor:new()
+        end
     end
 end
 
@@ -41,10 +43,12 @@ function Board:draw()
     --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces
     for i=1,6 do
         for j=1,6 do
+            print (Board[i][j].faded)
+            if Board[i][j].faded == true then love.graphics.setColor(43,43,43)
+            else love.graphics.setColor(255,255,255) end
             love.graphics.draw(Board[i][j].image,blockX * (i-1),blockY * (j+1/3),0,imageScaleX/6,imageScaleY/10.6666)       
         end
     end
-
     --love.graphics.draw(x_piece,0,0)
 end
 
@@ -64,7 +68,19 @@ function Board:getTile(x,y)
 
     if thisY <= 2 or thisY >= 9 then return false end
 
-    Board[thisX+1][thisY-2]:getType()
+    for i=1,6 do
+        for j=1,6 do
+            if Board[thisX+1][thisY-2].name ~= Board[i][j].name then Board[i][j].faded = true end
+        end
+    end
+end
+
+function Board:handsOff()
+    for i=1,6 do
+        for j=1,6 do
+            Board[i][j].faded = false
+        end
+    end
 end
 
 function getScaling(drawable)
