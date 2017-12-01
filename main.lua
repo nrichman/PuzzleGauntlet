@@ -33,6 +33,7 @@ function gamestate:mousepressed(x,y,button,istouch)
 end
 
 function gamestate:mousereleased(x,y,button,istouch)
+    MyBoard:processMatch()
     MyBoard:handsOff()
 end
 

@@ -13,6 +13,8 @@ for i=1,6 do
     for j=1,6 do
         --if i % 2 == 0 then 
             Board[i][j] = tile_sword:new()
+            Board[i][j].x = i
+            Board[i][j].y = j
         --else Board[i][j] = tile_armor:new()
         --end
     end
@@ -25,7 +27,6 @@ function Board:new()
     self.matching = false
     self.matched = 'base'
     self.matchlist = {}
-    self.matchsize = 1
     self.prevpos = {x = 0, y = 0}
     return setmetatable(tablestate, self)
 end
@@ -50,9 +51,11 @@ function Board:draw()
     --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces
     for i=1,6 do
         for j=1,6 do
+            if self[i][j] == nil then goto continue end
             if self[i][j].faded == true then love.graphics.setColor(43,43,43)
             else love.graphics.setColor(255,255,255) end
-            love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (j+1/3),0,imageScaleX/6,imageScaleY/10.6666)       
+            love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (j+1/3),0,imageScaleX/6,imageScaleY/10.6666) 
+            ::continue::     
         end
     end
     --love.graphics.draw(x_piece,0,0)
@@ -93,8 +96,7 @@ function Board:tileDrag(x,y)
 
     --If we're hovering another tile and it's adjacent, highlight and add it to the list
     if self[thisX+1][thisY-2].name == self.matched and self:proximityMatch(thisX+1,thisY-2) then
-        self.matchsize = self.matchsize + 1
-        self.matchlist[self.matchsize] = self[thisX+1][thisY-2]
+        self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
         self[thisX+1][thisY-2].faded = true
         self.prevpos.x = thisX+1
         self.prevpos.y = thisY-2
@@ -111,7 +113,7 @@ function Board:tileSelected(x,y)
     self.matching = true
     self[thisX+1][thisY-2].faded = true
     self.matched = self[thisX+1][thisY-2].name
-    self.matchlist[self.matchsize] = self[thisX+1][thisY-2]
+    self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
     self.prevpos.x = thisX+1
     self.prevpos.y = thisY-2
     --[[
@@ -122,16 +124,54 @@ function Board:tileSelected(x,y)
     end]]
 end
 
+function Board:processMatch()
+    if #self.matchlist < 3 then
+        self:handsOff()
+        return
+    end
+
+    print(self.matched .. ' ' .. #self.matchlist)
+    --For each element in the list of matches, get its x and y position on the board and remove it
+    for i=1,#self.matchlist do
+        self[self.matchlist[i].x][self.matchlist[i].y] = nil
+    end
+    self:generateTiles()
+    
+    return 
+end
+
 function Board:handsOff()
     self.matching = false
     self.matched = 'base'
-    self.matchsize = 1
     self.matchlist = {}
     for i=1,6 do
         for j=1,6 do
-            self[i][j].faded = false
+            if self[i][j] == nil then goto continue end
+                self[i][j].faded = false
+            ::continue::
         end
     end
+end
+
+function Board:generateTiles()
+    for i=1,6 do
+        for j=1,6 do
+            if self[i][j] == nil then
+                self:createTile(i,j)
+            end
+        end
+    end
+end
+
+function Board:createTile(i,j)
+    random = love.math.random(1,2)
+    if random == 1 then
+        self[i][j] = tile_sword:new()
+    else
+        self[i][j] = tile_armor:new()
+    end
+    self[i][j].x = i
+    self[i][j].y = j
 end
 
 function getScaling(drawable)
