@@ -76,10 +76,22 @@ end
 
 --Drag the match to another tile
 function Board:tileDrag(x,y)
-    thisX = math.floor(x / (love.graphics.getWidth() / 6))
-    thisY = math.floor((y / (love.graphics.getHeight() / 10.66666) + 1.6666))
+    widthval = x / (love.graphics.getWidth() / 6)
+    heightval = y / (love.graphics.getHeight() / 10.66666) + 1.666666
 
+    thisX = math.floor(widthval)
+    thisY = math.floor(heightval)
+
+    --Lower hitboxes a bit to make diagonal swipes easier
+    if widthval - thisX > 0.85 then return end
+    if heightval - thisY > 0.85 then return end
+    if widthval - thisX < 0.15 then return end
+    if heightval - thisY < 0.15 then return end
+
+    --If we're out of bounds, cancel the matching
     if thisY <= 2 or thisY >= 9 then self:handsOff() return end
+
+    --If we're hovering another tile and it's adjacent, highlight and add it to the list
     if self[thisX+1][thisY-2].name == self.matched and self:proximityMatch(thisX+1,thisY-2) then
         self.matchsize = self.matchsize + 1
         self.matchlist[self.matchsize] = self[thisX+1][thisY-2]
