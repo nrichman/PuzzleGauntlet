@@ -1,6 +1,5 @@
 require 'board'
 require 'menu'
-require 'mouseinput'
 
 local gamestate = {}
 local menustate = {}
@@ -13,12 +12,11 @@ MyMenu = Menu:new()
 --X goes first
 turn = 'x'
 winner = ''
-
+print("LOL")
 
 --Load method occurs first
 function love.load()
     love.filesystem.load('board.lua')()
-    love.filesystem.load('mouseinput.lua')()
     StateMachine.registerEvents()
     StateMachine.switch(menustate)
 end
@@ -31,11 +29,17 @@ function menustate:mousepressed(x, y, button, istouch)
 end
 
 function gamestate:mousepressed(x,y,button,istouch)
-    MyBoard:getTile(x,y)
+    MyBoard:tileSelected(x,y)
 end
 
 function gamestate:mousereleased(x,y,button,istouch)
     MyBoard:handsOff()
+end
+
+function gamestate:update(dt)
+    if MyBoard.matching == true then
+        MyBoard:tileDrag(love.mouse.getX(),love.mouse.getY())
+    end
 end
 
 function menustate:enter()
