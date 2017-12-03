@@ -51,7 +51,7 @@ function menustate:update(dt)
     
 end
     
-function menustate:draw()
+function menustate:draw(dt)
     MyMenu:draw()
 end
 

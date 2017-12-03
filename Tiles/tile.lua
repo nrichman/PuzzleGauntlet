@@ -3,6 +3,7 @@ tile.name = 'base'
 tile.faded = false
 tile.x = -1
 tile.y = -1
+tile.from = 7
 
 function tile:new()
     newObj = {sound = 'woof'}

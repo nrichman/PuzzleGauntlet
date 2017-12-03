@@ -5,16 +5,24 @@ tile_sword = require 'Tiles/tile_sword'
 blockX = love.graphics.getWidth()/6
 blockY = love.graphics.getHeight()/10.66666
 
+function randomTile()
+    random = love.math.random(1,2)
+    if random == 1 then
+        return tile_sword:new()
+    end
+    return tile_armor:new()
+end
 
 --Initialize a board
 Board = {}
 for i=1,6 do
     Board[i] = {}
     for j=1,6 do
-        --if i % 2 == 0 then 
-            Board[i][j] = tile_sword:new()
+        --if i % 2 == 0 then
+            Board[i][j] = randomTile()
             Board[i][j].x = i
             Board[i][j].y = j
+            Board[i][j].dropfrom = j
         --else Board[i][j] = tile_armor:new()
         --end
     end
@@ -52,6 +60,19 @@ function Board:draw()
     for i=1,6 do
         for j=1,6 do
             if self[i][j] == nil then goto continue end
+
+            if self[i][j].dropfrom ~= j then
+                dt = 5 * love.timer.getDelta()
+                print(dt)
+                love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (self[i][j].dropfrom+(1/3)),0,imageScaleX/6,imageScaleY/10.6666)
+                self[i][j].dropfrom = self[i][j].dropfrom + dt
+
+                if self[i][j].dropfrom + 1/3 > j then
+                    self[i][j].dropfrom = j
+                end
+                goto continue
+            end
+
             if self[i][j].faded == true then love.graphics.setColor(43,43,43)
             else love.graphics.setColor(255,255,255) end
             love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (j+1/3),0,imageScaleX/6,imageScaleY/10.6666) 
@@ -116,12 +137,6 @@ function Board:tileSelected(x,y)
     self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
     self.prevpos.x = thisX+1
     self.prevpos.y = thisY-2
-    --[[
-    for i=1,6 do
-        for j=1,6 do
-            if Board[thisX+1][thisY-2].name ~= Board[i][j].name then Board[i][j].faded = true end
-        end
-    end]]
 end
 
 function Board:processMatch()
@@ -130,13 +145,13 @@ function Board:processMatch()
         return
     end
 
-    print(self.matched .. ' ' .. #self.matchlist)
     --For each element in the list of matches, get its x and y position on the board and remove it
     for i=1,#self.matchlist do
+        print(self.matchlist[i].x  .. ' ' .. self.matchlist[i].y)
         self[self.matchlist[i].x][self.matchlist[i].y] = nil
     end
-    self:generateTiles()
-    
+    --self:generateTiles()
+    self:dropTiles()
     return 
 end
 
@@ -153,16 +168,23 @@ function Board:handsOff()
     end
 end
 
+--Generates all of the tiles
 function Board:generateTiles()
     for i=1,6 do
         for j=1,6 do
             if self[i][j] == nil then
-                self:createTile(i,j)
+                --The empty tile is on the top row
+                if i == 1 then
+                    self:createTile(i,j)
+                else
+                    self:createTile(i,j)
+                end
             end
         end
     end
 end
 
+--Randomly creates a tile 
 function Board:createTile(i,j)
     random = love.math.random(1,2)
     if random == 1 then
@@ -172,6 +194,24 @@ function Board:createTile(i,j)
     end
     self[i][j].x = i
     self[i][j].y = j
+end
+
+--Moves all tiles down if there is an empty space below them
+function Board:dropTiles()
+    ::restart::
+    for i=1,6,1 do
+        for j=1,6,1 do
+            if self[i][j] == nil then
+                if self[i][j-1] ~= nil then
+                    self[i][j] = self[i][j-1]
+                    self[i][j].dropfrom = j-1
+                    self[i][j].y = j
+                    self[i][j-1] = nil
+                    goto restart
+                end
+            end
+        end
+    end
 end
 
 function getScaling(drawable)
