@@ -67,7 +67,7 @@ function Board:draw()
                 love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (self[i][j].dropfrom+(1/3)),0,imageScaleX/6,imageScaleY/10.6666)
                 self[i][j].dropfrom = self[i][j].dropfrom + dt
 
-                if self[i][j].dropfrom + 1/3 > j then
+                if self[i][j].dropfrom > j then
                     self[i][j].dropfrom = j
                 end
                 goto continue
@@ -194,6 +194,7 @@ function Board:createTile(i,j)
     end
     self[i][j].x = i
     self[i][j].y = j
+    self[i][j].dropfrom = 1
 end
 
 --Moves all tiles down if there is an empty space below them
@@ -202,13 +203,17 @@ function Board:dropTiles()
     for i=1,6,1 do
         for j=1,6,1 do
             if self[i][j] == nil then
-                if self[i][j-1] ~= nil then
+                if self[i][j-1] ~= nil then                  
                     self[i][j] = self[i][j-1]
-                    self[i][j].dropfrom = j-1
+                    --If we need it to be dropped from a higher position
+                    if j-1 < self[i][j-1].dropfrom then
+                        self[i][j].dropfrom = j-1
+                    end      
                     self[i][j].y = j
                     self[i][j-1] = nil
-                    goto restart
                 end
+                self:createTile(i,1)
+                goto restart
             end
         end
     end
