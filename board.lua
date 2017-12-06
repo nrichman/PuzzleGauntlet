@@ -185,7 +185,7 @@ function Board:generateTiles()
 end
 
 --Randomly creates a tile 
-function Board:createTile(i,j)
+function Board:createTile(i,j,drop)
     random = love.math.random(1,2)
     if random == 1 then
         self[i][j] = tile_sword:new()
@@ -194,16 +194,20 @@ function Board:createTile(i,j)
     end
     self[i][j].x = i
     self[i][j].y = j
-    self[i][j].dropfrom = 1
+    self[i][j].dropfrom = drop
 end
 
 --Moves all tiles down if there is an empty space below them
 function Board:dropTiles()
+    --Drops all tiles down to their lowest points
     ::restart::
     for i=1,6,1 do
+        --Check to see if we've finished dropping everything
+        dropped = false
         for j=1,6,1 do
             if self[i][j] == nil then
-                if self[i][j-1] ~= nil then                  
+                if self[i][j-1] ~= nil then
+                    dropped = true
                     self[i][j] = self[i][j-1]
                     --If we need it to be dropped from a higher position
                     if j-1 < self[i][j-1].dropfrom then
@@ -212,8 +216,20 @@ function Board:dropTiles()
                     self[i][j].y = j
                     self[i][j-1] = nil
                 end
-                self:createTile(i,1)
-                goto restart
+                --If we haven't finished dropping something, restart
+                if dropped then
+                    goto restart
+                end
+            end
+        end
+    end
+
+    for i=1,6 do
+        todrop = 0
+        for j=6,1,-1 do
+            if self[i][j] == nil then
+                self:createTile(i,j,todrop)
+                todrop = todrop - 1
             end
         end
     end
