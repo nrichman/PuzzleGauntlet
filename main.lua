@@ -1,5 +1,6 @@
 require 'board'
 require 'menu'
+require 'party'
 
 local gamestate = {}
 local menustate = {}
@@ -8,11 +9,10 @@ StateMachine = require "StateMachine"
 --Initialize our board object
 board = love.graphics.newImage('resources/Puzzle_Board.png')
 MyBoard = Board:new()
+MyParty = Party:new()
 MyMenu = Menu:new()
---X goes first
-turn = 'x'
-winner = ''
-print("LOL")
+
+party = {}
 
 --Load method occurs first
 function love.load()
@@ -61,4 +61,5 @@ function gamestate:draw()
     imageScaleX,imageScaleY = getScaling(board)
     love.graphics.draw(board,0,0,0,imageScaleX,imageScaleY) --Draws the board
     MyBoard:draw() --Draws the pieces on the board
+    MyParty:draw()    
 end

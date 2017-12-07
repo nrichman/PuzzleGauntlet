@@ -39,20 +39,6 @@ function Board:new()
     return setmetatable(tablestate, self)
 end
 
---Set a piece on the board. Returns true if successful
-function Board:setToken(n, turn)
-    if n == nil then return false end
-    if self[n] ~= nil then return false end
-    
-    if turn == 'x' then
-        self[n] = x_piece
-    else 
-        self[n] = o_piece
-    end
-
-    return true
-end
-
 --Method to draw the pieces on the board
 function Board:draw()
     imageScaleX,imageScaleY = getScaling(tile_armor.image)    
@@ -63,7 +49,6 @@ function Board:draw()
 
             if self[i][j].dropfrom ~= j then
                 dt = 5 * love.timer.getDelta()
-                print(dt)
                 love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (self[i][j].dropfrom+(1/3)),0,imageScaleX/6,imageScaleY/10.6666)
                 self[i][j].dropfrom = self[i][j].dropfrom + dt
 
@@ -147,7 +132,6 @@ function Board:processMatch()
 
     --For each element in the list of matches, get its x and y position on the board and remove it
     for i=1,#self.matchlist do
-        print(self.matchlist[i].x  .. ' ' .. self.matchlist[i].y)
         self[self.matchlist[i].x][self.matchlist[i].y] = nil
     end
     --self:generateTiles()
@@ -202,7 +186,7 @@ function Board:dropTiles()
     --Drops all tiles down to their lowest points
     ::restart::
     for i=1,6,1 do
-        --Check to see if we've finished dropping everything
+        --Drop things in each column until we're done
         dropped = false
         for j=1,6,1 do
             if self[i][j] == nil then
@@ -224,6 +208,7 @@ function Board:dropTiles()
         end
     end
 
+    --Once we've finished dropping tiles, create new ones above them
     for i=1,6 do
         todrop = 0
         for j=6,1,-1 do
@@ -235,6 +220,7 @@ function Board:dropTiles()
     end
 end
 
+--Used to get scaling for all resolutions
 function getScaling(drawable)
 	local drawW = drawable:getWidth()
     local drawH = drawable:getHeight()

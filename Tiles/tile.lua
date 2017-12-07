@@ -11,10 +11,6 @@ function tile:new()
     return setmetatable(newObj, self)
 end
 
-function tile:getType()
-    print(self.name)
-end
-
 function tile:canMatch(other_tile)
     if other_tile.name == self.name then
         return true
