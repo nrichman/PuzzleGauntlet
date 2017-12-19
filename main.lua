@@ -2,13 +2,17 @@ require 'board'
 require 'menu'
 require 'party'
 
+job_knight = require 'Jobs/knight'
+job_healer = require 'Jobs/healer'
+job_paladin = require 'Jobs/paladin'
+
 local gamestate = {}
 local menustate = {}
 
 StateMachine = require "StateMachine"
 --Initialize our board object
 board = love.graphics.newImage('resources/Puzzle_Board.png')
-MyBoard = Board:new()
+MyBoard = Board:new( { job_knight, job_healer, job_paladin })
 MyParty = Party:new()
 MyMenu = Menu:new()
 

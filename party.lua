@@ -16,7 +16,7 @@ end
 
 --Method to draw the pieces on the board
 function Party:draw()
-    print (self[1].type)
+    --print (self[1].type)
     --imageScaleX,imageScaleY = getScaling(tile_armor.image)
     
     --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces

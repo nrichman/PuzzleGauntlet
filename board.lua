@@ -1,41 +1,51 @@
 tile_armor = require 'Tiles/tile_armor'
 tile_sword = require 'Tiles/tile_sword'
+tile_staff = require 'Tiles/tile_staff'
 
 --Starting X,Y and width/height for each tile
 blockX = love.graphics.getWidth()/6
 blockY = love.graphics.getHeight()/10.66666
 
-function randomTile()
-    random = love.math.random(1,2)
-    if random == 1 then
-        return tile_sword:new()
-    end
-    return tile_armor:new()
-end
+--self.tileList = { [tile_sword:new().name]=0 , [tile_armor:new().name]=0, [tile_staff:new().name]=0 }
 
---Initialize a board
+--Initialize the board
 Board = {}
-for i=1,6 do
-    Board[i] = {}
-    for j=1,6 do
-        --if i % 2 == 0 then
-            Board[i][j] = randomTile()
-            Board[i][j].x = i
-            Board[i][j].y = j
-            Board[i][j].dropfrom = j
-        --else Board[i][j] = tile_armor:new()
-        --end
-    end
-end
-
---Initialize the board (object orientation style)
-function Board:new()
+function Board:new(party)
     tablestate = {}
     self.__index = self
     self.matching = false
     self.matched = 'base'
     self.matchlist = {}
     self.prevpos = {x = 0, y = 0}
+    self.tileList = {} --List of tiles on the board
+    self.tileMatchList = {} --Count of each tile on a match
+    
+    --Populates lists
+    for i=1,#party do
+        print("YO")
+        if party[i].type == 'ATK' then
+            self.tileMatchList[i] = tile_sword
+            self.tileList[tile_sword:new().name]=0
+        elseif party[i].type == 'DEF' then
+            self.tileMatchList[i] = tile_armor
+            self.tileList[tile_armor:new().name]=0
+        elseif party[i].type == 'SUP' then
+            self.tileMatchList[i] = tile_staff
+            self.tileList[tile_staff:new().name]=0 
+        end
+    end
+
+    --Populates tiles
+    for i=1,6 do
+        self[i] = {}
+        for j=1,6 do
+            random = love.math.random(1,#self.tileMatchList)            
+            self[i][j] = self.tileMatchList[random]:new()
+            self[i][j].x = i
+            self[i][j].y = j
+            self[i][j].dropfrom = j
+        end
+    end
     return setmetatable(tablestate, self)
 end
 
@@ -64,7 +74,6 @@ function Board:draw()
             ::continue::     
         end
     end
-    --love.graphics.draw(x_piece,0,0)
 end
 
 function Board:clear()
@@ -124,6 +133,7 @@ function Board:tileSelected(x,y)
     self.prevpos.y = thisY-2
 end
 
+--After a match has been completed, decipher it
 function Board:processMatch()
     if #self.matchlist < 3 then
         self:handsOff()
@@ -133,12 +143,20 @@ function Board:processMatch()
     --For each element in the list of matches, get its x and y position on the board and remove it
     for i=1,#self.matchlist do
         self[self.matchlist[i].x][self.matchlist[i].y] = nil
+        self.tileList[self.matchlist[i].name] = self.tileList[self.matchlist[i].name] + 1
     end
-    --self:generateTiles()
+
+    --Clear list of matches
+    for k,v in pairs(self.tileList) do
+        self.tileList[k] = 0
+    end
+
+    --Generate new tiles and drop some more 
     self:dropTiles()
     return 
 end
 
+--Ends a match with nothing exciting
 function Board:handsOff()
     self.matching = false
     self.matched = 'base'
@@ -170,12 +188,8 @@ end
 
 --Randomly creates a tile 
 function Board:createTile(i,j,drop)
-    random = love.math.random(1,2)
-    if random == 1 then
-        self[i][j] = tile_sword:new()
-    else
-        self[i][j] = tile_armor:new()
-    end
+    random = love.math.random(1,#self.tileMatchList)
+    self[i][j] = self.tileMatchList[random]:new()
     self[i][j].x = i
     self[i][j].y = j
     self[i][j].dropfrom = drop
