@@ -1,6 +1,7 @@
 tile_armor = require 'Tiles/tile_armor'
 tile_sword = require 'Tiles/tile_sword'
 tile_staff = require 'Tiles/tile_staff'
+tile_enemy = require 'Tiles/tile_enemy'
 
 --Starting X,Y and width/height for each tile
 blockX = love.graphics.getWidth()/6
@@ -17,23 +18,27 @@ function Board:new(party)
     self.matched = 'base'
     self.matchlist = {}
     self.prevpos = {x = 0, y = 0}
+    self.combatmatch = false
     self.tileList = {} --List of tiles on the board
     self.tileMatchList = {} --Count of each tile on a match
-    
+    self.party = party
+
     --Populates lists
     for i=1,#party do
-        print("YO")
-        if party[i].type == 'ATK' then
+        if party[i].primary == 'sword' then
             self.tileMatchList[i] = tile_sword
             self.tileList[tile_sword:new().name]=0
-        elseif party[i].type == 'DEF' then
+        elseif party[i].primary == 'armor' then
             self.tileMatchList[i] = tile_armor
             self.tileList[tile_armor:new().name]=0
-        elseif party[i].type == 'SUP' then
+        elseif party[i].primary == 'staff' then
             self.tileMatchList[i] = tile_staff
             self.tileList[tile_staff:new().name]=0 
         end
     end
+
+    self.tileMatchList[#party + 1] = tile_enemy
+    self.tileList[tile_enemy:new().name]=0
 
     --Populates tiles
     for i=1,6 do
@@ -82,16 +87,6 @@ function Board:clear()
     end
 end
 
---Checks if the tiles are adjancent
-function Board:proximityMatch(thisX,thisY)
-    for i=-1,1 do
-        for j=-1,1 do
-            if thisX+i == self.prevpos.x and thisY+j == self.prevpos.y and self[thisX][thisY].faded == false then return true end
-        end
-    end
-    return false
-end
-
 --Drag the match to another tile
 function Board:tileDrag(x,y)
     widthval = x / (love.graphics.getWidth() / 6)
@@ -110,13 +105,26 @@ function Board:tileDrag(x,y)
     if thisY <= 2 or thisY >= 9 then self:handsOff() return end
 
     --If we're hovering another tile and it's adjacent, highlight and add it to the list
-    if self[thisX+1][thisY-2].name == self.matched and self:proximityMatch(thisX+1,thisY-2) then
+    if self:canMatch(thisX+1,thisY-2)then
         self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
         self[thisX+1][thisY-2].faded = true
         self.prevpos.x = thisX+1
         self.prevpos.y = thisY-2
-        --self.matched = self[thisX+1][thisY-2]
     end
+end
+
+function Board:canMatch(thisX,thisY)
+    --If we're doing a combat match then tiles don't need the same name
+    if self.combatmatch and self[thisX][thisY].enemymatch then 
+    --If we aren't doing a comabt match then tiles need the same name
+    elseif self[thisX][thisY].name ~= self.matching then return false end
+    --Finally, check if we're in proximity
+    for i=-1,1 do
+        for j=-1,1 do
+            if thisX+i == self.prevpos.x and thisY+j == self.prevpos.y and self[thisX][thisY].faded == false then return true end
+        end
+    end
+    return false
 end
 
 --Selected the first tile
@@ -125,6 +133,7 @@ function Board:tileSelected(x,y)
     thisY = math.floor((y / (love.graphics.getHeight() / 10.66666) + 1.6666))
     if thisY <= 2 or thisY >= 9 then return false end
 
+    if self[thisX+1][thisY-2].enemymatch then self.combatmatch = true end
     self.matching = true
     self[thisX+1][thisY-2].faded = true
     self.matched = self[thisX+1][thisY-2].name
@@ -159,6 +168,7 @@ end
 --Ends a match with nothing exciting
 function Board:handsOff()
     self.matching = false
+    self.combatmatch = false
     self.matched = 'base'
     self.matchlist = {}
     for i=1,6 do

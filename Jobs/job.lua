@@ -4,7 +4,7 @@ job.name = 'none'
 job.pos = 1
 
 function job:new()
-    tablestate = {}
+    newObj = {}
     self.__index = self
-    return setmetatable(stablestate, self)
+    return setmetatable(newObj, self)
 end

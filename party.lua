@@ -4,12 +4,10 @@ job_knight = require 'Jobs/knight'
 blockX = love.graphics.getWidth()/6
 blockY = love.graphics.getHeight()/10.66666
 
---Initialize a board
+--Initialize a party
 Party = {job_knight,job_knight,job_knight}
-
---Initialize the board (object orientation style)
 function Party:new()
-    tablestate = {job_knight,job_knight,job_knight}
+    tablestate = {job_knight,job_healer,job_knight}
     self.__index = self
     return setmetatable(tablestate, self)
 end
@@ -21,7 +19,6 @@ function Party:draw()
     
     --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces
 end
-
 
 function getScaling(drawable)
 	local drawW = drawable:getWidth()

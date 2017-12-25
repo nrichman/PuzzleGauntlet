@@ -12,7 +12,7 @@ local menustate = {}
 StateMachine = require "StateMachine"
 --Initialize our board object
 board = love.graphics.newImage('resources/Puzzle_Board.png')
-MyBoard = Board:new( { job_knight, job_healer, job_paladin })
+MyBoard = {}
 MyParty = Party:new()
 MyMenu = Menu:new()
 
@@ -27,8 +27,10 @@ end
 
 --Method occurs when mouse is pressed
 function menustate:mousepressed(x, y, button, istouch)
+    --Start dungeon run
     if Menu:ProcessInput(x,y) then
         StateMachine.switch(gamestate)
+        MyBoard = Board:new(MyParty)
     end
 end
 

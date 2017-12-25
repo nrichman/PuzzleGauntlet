@@ -1,7 +1,7 @@
 require 'Jobs/job'
 
-job_paladin = tile:new()
-job_paladin.type = 'DEF'
+job_paladin = job:new()
+job_paladin.primary = 'armor'
 job_paladin.name = 'paladin'
 job_paladin.image = love.graphics.newImage('resources/rogue.png')
 
