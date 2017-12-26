@@ -7,6 +7,13 @@ tile_enemy = require 'Tiles/tile_enemy'
 blockX = love.graphics.getWidth()/6
 blockY = love.graphics.getHeight()/10.66666
 
+match_forwardslash = love.graphics.newImage('resources/match_forwardslash.png')
+match_backslash = love.graphics.newImage('resources/match_backslash.png')
+match_updown = love.graphics.newImage('resources/match_updown.png')
+match_leftright = love.graphics.newImage('resources/match_leftright.png')
+match_endpoint = love.graphics.newImage('resources/match_endpoint.png')
+
+
 --self.tileList = { [tile_sword:new().name]=0 , [tile_armor:new().name]=0, [tile_staff:new().name]=0 }
 
 --Initialize the board
@@ -79,6 +86,36 @@ function Board:draw()
             ::continue::     
         end
     end
+
+    for i=1,#self.matchlist do
+        love.graphics.draw(match_endpoint,blockX * (self.matchlist[i].x-1), blockY * (self.matchlist[i].y + (1/3)), 0,imageScaleX/6,imageScaleY/10.666)        
+    end
+
+    --Draw lines inbetween matched tiles
+    for i=2,#self.matchlist do
+        offset = 0
+        prev = self.matchlist[i-1]
+        slopex,slopey = prev.x - self.matchlist[i].x, prev.y - self.matchlist[i].y
+            
+        --Line that goes up and down
+        if slopex == 0 then
+            if slopey < 0 then offset = 1 end
+            love.graphics.draw(match_updown,blockX * (self.matchlist[i].x-1), blockY * (self.matchlist[i].y + (1/3) - offset), 0,imageScaleX/6,imageScaleY/10.666)
+        --Line that goes left to right     
+        elseif slopey == 0 then
+            if slopex > 0 then offset = 1 end
+            love.graphics.draw(match_leftright,blockX * (self.matchlist[i].x-2 + offset), blockY * (self.matchlist[i].y + (1/3)), 0,imageScaleX/6,imageScaleY/10.666)                    
+        --Diagnols
+        elseif slopex == 1 and slopey == 1 then
+            love.graphics.draw(match_backslash,blockX * (self.matchlist[i].x-2 + offset+1), blockY * (self.matchlist[i].y + (1/3)), 0,imageScaleX/6,imageScaleY/10.666)                     
+        elseif slopex == -1 and slopey == -1 then
+            love.graphics.draw(match_backslash,blockX * (self.matchlist[i].x-2 + offset), blockY * (self.matchlist[i].y + (1/3)-1), 0,imageScaleX/6,imageScaleY/10.666)                                     
+        elseif slopex == -1 and slopey == 1 then
+            love.graphics.draw(match_forwardslash,blockX * (self.matchlist[i].x-2), blockY * (self.matchlist[i].y + (1/3)), 0,imageScaleX/6,imageScaleY/10.666)                     
+        elseif slopex == 1 and slopey == -1 then
+            love.graphics.draw(match_forwardslash,blockX * (self.matchlist[i].x-2+1), blockY * (self.matchlist[i].y + (1/3)-1), 0,imageScaleX/6,imageScaleY/10.666)                     
+        end
+    end
 end
 
 function Board:clear()
@@ -107,7 +144,7 @@ function Board:tileDrag(x,y)
     --If we're hovering another tile and it's adjacent, highlight and add it to the list
     if self:canMatch(thisX+1,thisY-2)then
         self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
-        self[thisX+1][thisY-2].faded = true
+        self[thisX+1][thisY-2].matched = true
         self.prevpos.x = thisX+1
         self.prevpos.y = thisY-2
     end
@@ -117,11 +154,11 @@ function Board:canMatch(thisX,thisY)
     --If we're doing a combat match then tiles don't need the same name
     if self.combatmatch and self[thisX][thisY].enemymatch then --do nothing
     --If we aren't doing a comabt match then tiles need the same name
-    elseif self[thisX][thisY].name ~= self.matched then print(self.matching)return false end
+    elseif self[thisX][thisY].name ~= self.matched then return false end
     --Finally, check if we're in proximity
     for i=-1,1 do
         for j=-1,1 do
-            if thisX+i == self.prevpos.x and thisY+j == self.prevpos.y and self[thisX][thisY].faded == false then return true end
+            if thisX+i == self.prevpos.x and thisY+j == self.prevpos.y and self[thisX][thisY].matched == false then return true end
         end
     end
     return false
@@ -133,13 +170,31 @@ function Board:tileSelected(x,y)
     thisY = math.floor((y / (love.graphics.getHeight() / 10.66666) + 1.6666))
     if thisY <= 2 or thisY >= 9 then return false end
 
-    if self[thisX+1][thisY-2].enemymatch then self.combatmatch = true end
     self.matching = true
-    self[thisX+1][thisY-2].faded = true
+    self[thisX+1][thisY-2].matched = true
     self.matched = self[thisX+1][thisY-2].name
     self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
     self.prevpos.x = thisX+1
     self.prevpos.y = thisY-2
+
+    
+    --If we're starting a combat match
+    if self[thisX+1][thisY-2].enemymatch then 
+        self.combatmatch = true
+        --Fade tiles that can't be matched
+        for i=1,6 do
+            for j=1,6 do
+                if not self[i][j].enemymatch then self[i][j].faded = true end
+            end
+        end
+    else
+        --Fade tiles that can't be matched
+        for i=1,6 do
+            for j=1,6 do
+                if self.matched ~= self[i][j].name then self[i][j].faded = true end
+            end
+        end
+    end
 end
 
 --After a match has been completed, decipher it
@@ -175,6 +230,7 @@ function Board:handsOff()
         for j=1,6 do
             if self[i][j] == nil then goto continue end
                 self[i][j].faded = false
+                self[i][j].matched = false
             ::continue::
         end
     end

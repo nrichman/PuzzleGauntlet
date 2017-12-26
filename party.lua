@@ -7,7 +7,7 @@ blockY = love.graphics.getHeight()/10.66666
 --Initialize a party
 Party = {job_knight,job_knight,job_knight}
 function Party:new()
-    tablestate = {job_knight,job_healer,job_knight}
+    tablestate = {job_knight,job_healer,job_paladin}
     self.__index = self
     return setmetatable(tablestate, self)
 end

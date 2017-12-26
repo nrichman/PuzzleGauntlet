@@ -1,6 +1,7 @@
 tile = {}
 tile.name = 'base'
 tile.faded = false
+tile.matched = false
 
 --Used for positioning of all tiles on the board
 tile.x = -1
