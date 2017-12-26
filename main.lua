@@ -11,7 +11,7 @@ local menustate = {}
 
 StateMachine = require "StateMachine"
 --Initialize our board object
-board = love.graphics.newImage('resources/Puzzle_Board.png')
+board = love.graphics.newImage('resources/Puzzle_Board_UI.png')
 MyBoard = {}
 MyParty = Party:new()
 MyMenu = Menu:new()

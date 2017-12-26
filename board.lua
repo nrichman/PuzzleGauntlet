@@ -115,9 +115,9 @@ end
 
 function Board:canMatch(thisX,thisY)
     --If we're doing a combat match then tiles don't need the same name
-    if self.combatmatch and self[thisX][thisY].enemymatch then 
+    if self.combatmatch and self[thisX][thisY].enemymatch then --do nothing
     --If we aren't doing a comabt match then tiles need the same name
-    elseif self[thisX][thisY].name ~= self.matching then return false end
+    elseif self[thisX][thisY].name ~= self.matched then print(self.matching)return false end
     --Finally, check if we're in proximity
     for i=-1,1 do
         for j=-1,1 do
