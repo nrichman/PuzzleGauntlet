@@ -83,6 +83,7 @@ function Board:draw()
             if self[i][j].faded == true then love.graphics.setColor(43,43,43)
             else love.graphics.setColor(255,255,255) end
             love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (j+1/3),0,imageScaleX/6,imageScaleY/10.6666) 
+            love.graphics.setColor(255,255,255)
             ::continue::     
         end
     end
@@ -141,12 +142,16 @@ function Board:tileDrag(x,y)
     --If we're out of bounds, cancel the matching
     if thisY <= 2 or thisY >= 9 then self:handsOff() return end
 
+    --If we move backwards, remove the tip
+    if #self.matchlist > 1 and self.matchlist[#self.matchlist - 1].x == thisX+1 and self.matchlist[#self.matchlist - 1].y == thisY-2 then
+        self[self.matchlist[#self.matchlist].x][self.matchlist[#self.matchlist].y].matched = false
+        table.remove(self.matchlist,#self.matchlist) 
+    end
+
     --If we're hovering another tile and it's adjacent, highlight and add it to the list
     if self:canMatch(thisX+1,thisY-2)then
         self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
         self[thisX+1][thisY-2].matched = true
-        self.prevpos.x = thisX+1
-        self.prevpos.y = thisY-2
     end
 end
 
@@ -158,7 +163,7 @@ function Board:canMatch(thisX,thisY)
     --Finally, check if we're in proximity
     for i=-1,1 do
         for j=-1,1 do
-            if thisX+i == self.prevpos.x and thisY+j == self.prevpos.y and self[thisX][thisY].matched == false then return true end
+            if thisX+i == self.matchlist[#self.matchlist].x and thisY+j == self.matchlist[#self.matchlist].y and self[thisX][thisY].matched == false then return true end
         end
     end
     return false
@@ -174,9 +179,6 @@ function Board:tileSelected(x,y)
     self[thisX+1][thisY-2].matched = true
     self.matched = self[thisX+1][thisY-2].name
     self.matchlist[#self.matchlist + 1] = self[thisX+1][thisY-2]
-    self.prevpos.x = thisX+1
-    self.prevpos.y = thisY-2
-
     
     --If we're starting a combat match
     if self[thisX+1][thisY-2].enemymatch then 
