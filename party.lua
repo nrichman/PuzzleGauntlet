@@ -1,8 +1,12 @@
 job_knight = require 'Jobs/knight'
 
 --Starting X,Y and width/height for each tile
-blockX = love.graphics.getWidth()/6
-blockY = love.graphics.getHeight()/10.66666
+blockX = love.graphics.getWidth()/3
+blockY = love.graphics.getHeight()/5.333333
+
+healthX = love.graphics.getWidth()/3
+healthY = love.graphics.getHeight()/16
+healthdamage = love.graphics.newImage('resources/health_damage.png')
 
 --Initialize a party
 Party = {job_knight,job_knight,job_knight}
@@ -14,10 +18,19 @@ end
 
 --Method to draw the pieces on the board
 function Party:draw()
-    --print (self[1].type)
-    --imageScaleX,imageScaleY = getScaling(tile_armor.image)
-    
-    --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces
+    skip = 0
+    for i=1,3 do
+        imageScaleX,imageScaleY = getScaling(healthdamage)
+        love.graphics.draw(healthdamage,
+            love.graphics.newQuad(0,0,
+                (self[i].health_current/self[i].health_max) * healthdamage:getWidth()*imageScaleX/3,healthdamage:getHeight()*imageScaleY/16,
+                healthdamage:getWidth()*imageScaleX/3,healthdamage:getHeight()*imageScaleY/16),
+            healthX * (i-1),healthY * 12,0)
+
+        imageScaleX,imageScaleY = getScaling(self[i].image)
+        love.graphics.draw(self[i].image,blockX * (i-1+skip),blockY*(9 - 1/3),0,imageScaleX/3,imageScaleY/5.3333)
+        skip = skip + 1 
+    end
 end
 
 function getScaling(drawable)

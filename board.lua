@@ -29,6 +29,7 @@ function Board:new(party)
     self.tileList = {} --List of tiles on the board
     self.tileMatchList = {} --Count of each tile on a match
     self.party = party
+    self.dropping = false
 
     --Populates lists
     for i=1,#party do
@@ -65,11 +66,13 @@ end
 function Board:draw()
     imageScaleX,imageScaleY = getScaling(tile_armor.image)    
     --Iterate over the table of the board. Keys represent spaces on the board, values represent pieces
+    drop_count = 0
     for i=1,6 do
         for j=1,6 do
             if self[i][j] == nil then goto continue end
 
             if self[i][j].dropfrom ~= j then
+                drop_count = drop_count + 1
                 dt = 5 * love.timer.getDelta()
                 love.graphics.draw(self[i][j].image,blockX * (i-1),blockY * (self[i][j].dropfrom+(1/3)),0,imageScaleX/6,imageScaleY/10.6666)
                 self[i][j].dropfrom = self[i][j].dropfrom + dt
@@ -79,6 +82,9 @@ function Board:draw()
                 end
                 goto continue
             end
+
+            self.dropping = true and drop_count > 0 or false
+            print (self.dropping)
 
             if self[i][j].faded == true then love.graphics.setColor(43,43,43)
             else love.graphics.setColor(255,255,255) end
@@ -171,6 +177,7 @@ end
 
 --Selected the first tile
 function Board:tileSelected(x,y)
+    if self.dropping then return false end
     thisX = math.floor(x / (love.graphics.getWidth() / 6))
     thisY = math.floor((y / (love.graphics.getHeight() / 10.66666) + 1.6666))
     if thisY <= 2 or thisY >= 9 then return false end
@@ -300,6 +307,8 @@ function Board:dropTiles()
             end
         end
     end
+
+    print 'yo'
 end
 
 --Used to get scaling for all resolutions
